@@ -100,6 +100,9 @@ function App() {
       createUser('guest').then((res) => {
         if (!('data' in res)) return;
         userId.value = res.data.createUser;
+        const { id, name } = res.data.createUser;
+        setUser({ id, name });
+        setUserName(name);
       });
     } else {
       fetchUser(userId.value).then((res) => {
@@ -274,7 +277,6 @@ function App() {
               return new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime()
             }).map((card) => {
               if (card.number == null) return null;
-              console.log(card)
               return (
                 <Box key={card.id}>
                   <Typography>{card.user?.name}</Typography>
@@ -292,7 +294,7 @@ function App() {
               type="text"
               color="primary"
               size="small"
-              sx={{ width: 100 }}
+              sx={{ width: 120 }}
               value={userName}
               onChange={(e: any) => setUserName(e.target.value)}
               placeholder="ユーザー名を入力"
