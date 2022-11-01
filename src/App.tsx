@@ -25,6 +25,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: 16,
     overflowY: 'auto',
     backgroundColor: '#cbffee',
+    boxSizing: 'border-box',
   },
   main: {
     margin: 16,
