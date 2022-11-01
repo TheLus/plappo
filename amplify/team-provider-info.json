@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-plappo-dev-220145-authRole",
+      "UnauthRoleArn": "arn:aws:iam::464717245187:role/amplify-plappo-dev-220145-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::464717245187:role/amplify-plappo-dev-220145-authRole",
+      "Region": "ap-northeast-1",
+      "DeploymentBucketName": "amplify-plappo-dev-220145-deployment",
+      "UnauthRoleName": "amplify-plappo-dev-220145-unauthRole",
+      "StackName": "amplify-plappo-dev-220145",
+      "StackId": "arn:aws:cloudformation:ap-northeast-1:464717245187:stack/amplify-plappo-dev-220145/58804010-552e-11ed-9fb3-061f98acb957",
+      "AmplifyAppId": "dpxxbrh4l6dtp"
+    },
+    "categories": {
+      "api": {
+        "plappo": {}
+      }
+    }
+  }
+}
