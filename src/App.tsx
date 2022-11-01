@@ -1,4 +1,4 @@
-import React, { MouseEvent, useCallback, useEffect, useState } from "react";
+import React, { MouseEvent, useCallback, useEffect, useRef, useState } from "react";
 import Value from "storage-value";
 import "./App.css";
 import { Box, Button, TextField, Grid, SxProps, Typography } from "@mui/material";
@@ -68,7 +68,7 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [room, setRoom] = useState<Room | null>(null);
   const [cards, setCards] = useState<Card[]>([]);
-  // const [isCardsOpened, setIsCardsOpened] = useState(false);
+  const isPreparingUser = useRef(false);
 
   const updateUserName = useCallback(() => {
     if (user == null) return;
@@ -82,40 +82,49 @@ function App() {
     );
   }, [user, userName]);
 
-  const createUser = useCallback(async (name: string) => {
-    return await API.graphql(
+  const createUser = useCallback(async (userName: string) => {
+    const res = await API.graphql(
       graphqlOperation(_createUser, {
-        input: { name },
+        input: { name: userName },
       })
     );
+    if (!('data' in res)) return;
+    userId.value = res.data.createUser;
+    const { id, name } = res.data.createUser;
+    setUser({ id, name });
+    setUserName(name);
   }, []);
 
-  const fetchUser = useCallback(async (id: string) => {
-    return await API.graphql(
-      graphqlOperation(getUser, id)
+  const fetchUser = useCallback(async (user: User, roomId: string) => {
+    const res = await API.graphql(
+      graphqlOperation(getUser, user)
     ) as GraphQLResult<GetUserQuery>;
-  }, []);
+    if (res.data?.getUser == null) {
+      createUser('guest');
+      return;
+    };
+    const { id, name, cards } = res.data?.getUser;
+    const card = cards?.items.find((card) => card?.roomCardsId === roomId);
+    setUser({ id, name });
+    setUserName(name);
+    setSelectedCard(card);
+  }, [createUser]);
 
   useEffect(() => {
+    if (room == null) return;
+    if (isPreparingUser.current) return;
+    isPreparingUser.current = true;
     if (userId.value == null) {
-      createUser('guest').then((res) => {
-        if (!('data' in res)) return;
-        userId.value = res.data.createUser;
-        const { id, name } = res.data.createUser;
-        setUser({ id, name });
-        setUserName(name);
-      });
+      createUser('guest');
     } else {
-      fetchUser(userId.value).then((res) => {
-        if (res.data?.getUser == null) return;
-        const { id, name, cards } = res.data?.getUser;
-        const card = cards?.items.find((card) => card?.roomCardsId === room?.id);
-        setUser({ id, name, card });
-        setUserName(name);
-        setSelectedCard(card);
-      })
+      fetchUser(userId.value, room.id);
     }
-  }, [createUser, fetchUser, room?.id]);
+  }, [createUser, fetchUser, room]);
+
+  useEffect(() => {
+    if (user == null) return;
+    isPreparingUser.current = false;
+  }, [user]);
 
   // const createRoom = useCallback(async () => {
   //   const room = new Room({ cards: [] });
@@ -298,7 +307,7 @@ function App() {
               sx={{ width: 120 }}
               value={userName}
               onChange={(e: any) => setUserName(e.target.value)}
-              placeholder="ユーザー名を入力"
+              placeholder="guest"
               inputProps={{ maxLength: 20 }}
               onBlur={updateUserName}
             />
